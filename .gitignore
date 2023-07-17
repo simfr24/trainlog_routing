@@ -1,0 +1,6 @@
+*.osrm*
+*.pbf
+world/
+filtered_*
+output/
+
