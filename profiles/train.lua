@@ -4,15 +4,15 @@ function setup()
   return {
     properties = {
       max_speed_for_map_matching     = 220/3.6, -- speed conversion to m/s
-      weight_name                    = 'routability',
+      weight_name                    = 'duration',
       left_hand_driving              = true,
-      u_turn_penalty                 = 60 * 2, -- 2 minutes to change cabin
+      u_turn_penalty                 = 60 * 10, -- 10 minutes to change cabin
       turn_duration                  = 20,
       continue_straight_at_waypoint  = false,
       max_angle                      = 30,
 
       secondary_speed                = 30,
-      speed                          = 160,
+      speed                          = 130,
     },
 
     default_mode              = mode.train,
@@ -27,17 +27,6 @@ function ternary ( cond , T , F )
 end
 
 
-function process_node(profile, node, result, relations)
-    local railway = node:get_value_by_key("railway")
-
-    -- refuse railway nodes that we cannot go through
-    result.barrier = (
-        railway == "buffer_stop" or
-        railway == "derail"
-    )
-    result.traffic_lights = false
-end
-
 function process_way(profile, way, result, relations)
     local data = {
         railway = way:get_value_by_key("railway"),
@@ -47,7 +36,7 @@ function process_way(profile, way, result, relations)
         gauge = way:get_value_by_key("gauge"),
     }
 
- -- Remove everything that is not railway
+    -- Remove everything that is not railway
     if not data.railway then
         return
     end
@@ -61,33 +50,37 @@ function process_way(profile, way, result, relations)
 
     -- by default, use 30km/h for secondary rails, else 160
     local default_speed = ternary(is_secondary, profile.properties.secondary_speed, profile.properties.speed)
-    -- but is OSM specifies a maxspeed, use the one from OSM
+    -- but if OSM specifies a maxspeed, use the one from OSM
     local speed = ternary(data.maxspeed, data.maxspeed, default_speed)
 
-   -- Set speed for mph issue
+    -- Discourage use of railways under construction or disused by reducing rate
+    local rate = 1  -- Default rate
+    if data.railway == "construction" or data.railway == "disused" or data.service == "yard" then
+        rate = 0.01  -- Less preferred rate
+    end
+
+    -- Set speed for mph issue
     speed = tostring(speed)
     if speed:find(" mph") or speed:find("mph") then
       speed = speed:gsub(" mph", "")
       speed = speed:gsub("mph", "")
-        speed = tonumber (speed)
-        if speed == nil then speed = 20 end
-        speed = speed * 1.609344
+      speed = tonumber(speed)
+      if speed == nil then speed = 20 end
+      speed = speed * 1.609344
     else
-     speed = tonumber (speed)
+     speed = tonumber(speed)
     end
     -- Set speed for mph issue end
 
-
     result.forward_speed = speed
     result.backward_speed = speed
-    --
+    result.forward_rate = rate
+    result.backward_rate = rate
     result.forward_mode = mode.train
     result.backward_mode = mode.train
-    --
-    result.forward_rate = 1
-    result.backward_rate = 1
-
 end
+
+
 
 function process_turn(profile, turn)
     -- Refuse truns that have a big angle

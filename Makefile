@@ -45,12 +45,13 @@ train: output/filtered_train.osrm
 ferry: output/filtered_ferry.osrm
 
 all: output/filtered_ferry.osrm output/filtered_train.osrm
-serve-all: all
-	docker run --cpus=".1" -m 2000m -t -d -p 5000:5000 -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-routed --algorithm mld /opt/host/output/filtered_train.osrm
-	docker run --cpus=".1" -m 2000m -t -d -p 5001:5000 -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-routed --algorithm mld /opt/host/output/filtered_ferry.osrm
 
 serve-train: train
-	docker run --cpus=".1" -m 2000m -t -d -p 5000:5000 -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-routed --algorithm mld /opt/host/output/filtered_train.osrm
+	-@docker stop train_routing > /dev/null 2>&1 && docker rm train_routing > /dev/null 2>&1
+	docker run --cpus=".1" -m 2000m --name train_routing -t -d -p 5000:5000 -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-routed --algorithm mld /opt/host/output/filtered_train.osrm
 
 serve-ferry: ferry
-	docker run --cpus=".1" -m 2000m -t -d -p 5001:5000 -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-routed --algorithm mld /opt/host/output/filtered_ferry.osrm
+	-@docker stop ferry_routing > /dev/null 2>&1 && docker rm ferry_routing > /dev/null 2>&1
+	docker run --cpus=".1" -m 2000m --name ferry_routing -t -d -p 5001:5000 -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-routed --algorithm mld /opt/host/output/filtered_ferry.osrm
+
+serve-all: serve-train serve-ferry
