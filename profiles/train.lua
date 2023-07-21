@@ -4,7 +4,7 @@ function setup()
   return {
     properties = {
       max_speed_for_map_matching     = 220/3.6, -- speed conversion to m/s
-      weight_name                    = 'duration',
+      weight_name                    = 'routability',
       left_hand_driving              = true,
       u_turn_penalty                 = 60 * 10, -- 10 minutes to change cabin
       turn_duration                  = 20,
@@ -74,8 +74,8 @@ function process_way(profile, way, result, relations)
 
     result.forward_speed = speed
     result.backward_speed = speed
-    result.forward_rate = rate
-    result.backward_rate = rate
+    result.forward_rate = rate * speed * 1.5
+    result.backward_rate = rate * speed * 1.5
     result.forward_mode = mode.train
     result.backward_mode = mode.train
 end
