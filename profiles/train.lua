@@ -74,8 +74,8 @@ function process_way(profile, way, result, relations)
 
     result.forward_speed = speed
     result.backward_speed = speed
-    result.forward_rate = rate * speed * 1.5
-    result.backward_rate = rate * speed * 1.5
+    result.forward_rate = rate * ternary(speed == nil, 1, speed) * 1.5
+    result.backward_rate = rate * ternary(speed == nil, 1, speed) * 1.5
     result.forward_mode = mode.train
     result.backward_mode = mode.train
 end
