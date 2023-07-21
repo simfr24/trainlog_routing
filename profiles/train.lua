@@ -64,7 +64,7 @@ function process_way(profile, way, result, relations)
     -- but is OSM specifies a maxspeed, use the one from OSM
     local speed = ternary(data.maxspeed, data.maxspeed, default_speed)
 
-   -- fix speed for mph issue
+   -- Set speed for mph issue
     speed = tostring(speed)
     if speed:find(" mph") or speed:find("mph") then
       speed = speed:gsub(" mph", "")
@@ -75,7 +75,7 @@ function process_way(profile, way, result, relations)
     else
      speed = tonumber (speed)
     end
-    -- fix speed for mph issue end
+    -- Set speed for mph issue end
 
 
     result.forward_speed = speed

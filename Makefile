@@ -17,7 +17,6 @@ world/%.osm.pbf:
 filtered_ferry/%.osm.pbf: world/%.osm.pbf params/ferry_filter.params
 	mkdir -p filtered_ferry
 	osmium tags-filter --expressions=params/ferry_filter.params $< -o $@ --overwrite
-	osmium tags-filter --expressions=params/ferry_filter.params $< -o $@ --overwrite
 
 filtered_train/%.osm.pbf: world/%.osm.pbf params/train_filter.params
 	mkdir -p filtered_train
@@ -41,8 +40,17 @@ output/filtered_train.osrm: output/filtered_train.osm.pbf profiles/train.lua
 	docker run -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-partition /opt/host/$<
 	docker run -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-customize /opt/host/$<
 
-all: output/filtered_ferry.osrm output/filtered_train.osrm
+train: output/filtered_train.osrm
 
+ferry: output/filtered_ferry.osrm
+
+all: output/filtered_ferry.osrm output/filtered_train.osrm
 serve-all: all
-	docker run -t -d -p 5000:5000 -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-routed --algorithm mld /opt/host/output/filtered_train.osrm
-	docker run -t -d -p 5001:5000 -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-routed --algorithm mld /opt/host/output/filtered_ferry.osrm
+	docker run --cpus=".1" -m 2000m -t -d -p 5000:5000 -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-routed --algorithm mld /opt/host/output/filtered_train.osrm
+	docker run --cpus=".1" -m 2000m -t -d -p 5001:5000 -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-routed --algorithm mld /opt/host/output/filtered_ferry.osrm
+
+serve-train: train
+	docker run --cpus=".1" -m 2000m -t -d -p 5000:5000 -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-routed --algorithm mld /opt/host/output/filtered_train.osrm
+
+serve-ferry: ferry
+	docker run --cpus=".1" -m 2000m -t -d -p 5001:5000 -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-routed --algorithm mld /opt/host/output/filtered_ferry.osrm
