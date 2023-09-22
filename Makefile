@@ -1,4 +1,5 @@
 .PRECIOUS: %.pbf
+.SECONDARY: $(COUNTRIES_PBF)
 
 # Create the necessary directories if they don't exist
 $(shell mkdir -p world output)
@@ -44,7 +45,7 @@ train: output/filtered_train.osrm
 
 ferry: output/filtered_ferry.osrm
 
-all: output/filtered_ferry.osrm output/filtered_train.osrm
+all: train ferry
 
 serve-train: train
 	-@docker stop train_routing > /dev/null 2>&1 && docker rm train_routing > /dev/null 2>&1
