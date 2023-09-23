@@ -55,7 +55,7 @@ function process_way(profile, way, result, relations)
 
     -- Discourage use of railways under construction or disused by reducing rate
     local rate = 1  -- Default rate
-    if data.railway == "construction" or data.railway == "disused" or data.railway == "abandoned" or data.railway == "planned" or data.service == "yard" then
+    if data.railway == "construction" or data.railway == "disused" or data.railway == "abandoned" or data.railway == "proposed" or data.service == "yard" then
         rate = 0.01  -- Less preferred rate
     end
 
