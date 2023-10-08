@@ -9,7 +9,7 @@ function setup()
   return {
     properties = {
       weight_name                   = 'duration',
-      max_speed_for_map_matching    = 30/3.6,  -- kmph -> m/s
+      max_speed_for_map_matching    = 120/3.6,  -- kmph -> m/s
       call_tagless_node_function    = false,
       use_turn_restrictions         = false,
     },
@@ -44,8 +44,8 @@ function process_way(profile, way, result)
     result.forward_speed = profile.default_speed
     result.backward_speed = profile.default_speed
   else
-    result.forward_mode = mode.inaccessible
-    result.backward_mode = mode.inaccessible
+    -- If it's not a ferry, simply return without setting any mode or speed
+    return
   end
 end
 
