@@ -1,18 +1,24 @@
+# Existing content for directories creation and common variables
 .PRECIOUS: %.pbf
 .SECONDARY: $(COUNTRIES_PBF)
 
-# Create the necessary directories if they don't exist
-$(shell mkdir -p world output)
+$(shell mkdir -p world output filtered_ferry filtered_train filtered_bus world/europe)
 
-# List all the source countries we need
+# Common variables for train and ferry
 WANTED_COUNTRIES := $(shell grep -v "\#" countries.wanted)
-
-# Transform "europe" to "world/europe-latest.osm.pbf"
 COUNTRIES_PBF := $(addsuffix -latest.osm.pbf,$(addprefix world/,$(WANTED_COUNTRIES)))
+
+# New variables for bus
+BUS_WANTED_COUNTRIES := $(shell grep -v "\#" bus_countries.wanted)
+BUS_COUNTRIES_PBF := $(addsuffix -latest.osm.pbf,$(addprefix world/europe/,$(BUS_WANTED_COUNTRIES)))
 
 # Download the raw source file of a country
 world/%.osm.pbf:
 	wget -N -q --show-progress -P world/ https://download.geofabrik.de/$*.osm.pbf
+
+# Download the raw source file of a country for bus, specifying folder
+world/europe/%.osm.pbf:
+	wget -N -q --show-progress -P world/europe/ https://download.geofabrik.de/europe/$*.osm.pbf
 
 # Filter a raw country (in world/*) to type-specific data (in filtered/*)
 filtered_ferry/%.osm.pbf: world/%.osm.pbf params/ferry_filter.params
@@ -23,7 +29,8 @@ filtered_train/%.osm.pbf: world/%.osm.pbf params/train_filter.params
 	mkdir -p filtered_train
 	osmium tags-filter --expressions=params/train_filter.params $< -o $@ --overwrite
 
-filtered_bus/%.osm.pbf: world/%.osm.pbf params/bus_filter.params
+# Filter a raw country for bus (in world/europe/*) to type-specific data (in filtered_bus/*)
+filtered_bus/%.osm.pbf: world/europe/%.osm.pbf params/bus_filter.params
 	mkdir -p filtered_bus
 	osmium tags-filter --expressions=params/bus_filter.params $< -o $@ --overwrite
 
@@ -34,7 +41,8 @@ output/filtered_ferry.osm.pbf: $(subst world,filtered_ferry,$(COUNTRIES_PBF))
 output/filtered_train.osm.pbf: $(subst world,filtered_train,$(COUNTRIES_PBF))
 	osmium merge $^ -o $@ --overwrite
 
-output/filtered_bus.osm.pbf: $(subst world,filtered_bus,$(COUNTRIES_PBF))
+# Combine all type-specific bus data into one file, using BUS_COUNTRIES_PBF variable
+output/filtered_bus.osm.pbf: $(subst world/europe,filtered_bus,$(BUS_COUNTRIES_PBF))
 	osmium merge $^ -o $@ --overwrite
 
 # Compute the real OSRM data on the combined file
