@@ -99,6 +99,7 @@ function setup()
     },
 
     access_tags_hierarchy = Sequence {
+      'busway',
       'bus',
       'psv',
       'motorcar',
@@ -142,6 +143,7 @@ function setup()
     speeds = Sequence {
       highway = {
         motorway        = 90,
+        busway          = 50,
         motorway_link   = 45,
         trunk           = 85,
         trunk_link      = 40,
