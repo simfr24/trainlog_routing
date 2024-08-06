@@ -69,6 +69,7 @@ function process_way(profile, way, result, relations)
       speed = speed * 1.609344
     else
      speed = tonumber(speed)
+	 if speed == nil then speed = 32.18688 end
     end
     -- Set speed for mph issue end
 
