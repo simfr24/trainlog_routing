@@ -89,7 +89,7 @@ end
 function process_turn(profile, turn)
     -- Refuse truns that have a big angle
     if math.abs(turn.angle) >  profile.properties.max_angle then
-		turn.weight = constants.max_turn_weight
+		  turn.weight = constants.max_turn_weight
     end
 
     -- If we go backwards, add the penalty to change cabs

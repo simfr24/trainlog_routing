@@ -1,4 +1,3 @@
-# Existing content for directories creation and common variables
 .PRECIOUS: %.pbf
 .SECONDARY: $(COUNTRIES_PBF)
 
@@ -47,19 +46,19 @@ output/filtered_bus.osm.pbf: $(subst world/europe,filtered_bus,$(BUS_COUNTRIES_P
 
 # Compute the real OSRM data on the combined file
 output/filtered_ferry.osrm: output/filtered_ferry.osm.pbf profiles/ferry.lua
-	docker run -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-extract -p /opt/host/profiles/ferry.lua /opt/host/$<
-	docker run -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-partition /opt/host/$<
-	docker run -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-customize /opt/host/$<
+	docker run --rm -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-extract -p /opt/host/profiles/ferry.lua /opt/host/$<
+	docker run --rm -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-partition /opt/host/$<
+	docker run --rm -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-customize /opt/host/$<
 
 output/filtered_train.osrm: output/filtered_train.osm.pbf profiles/train.lua
-	docker run -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-extract -p /opt/host/profiles/train.lua /opt/host/$<
-	docker run -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-partition /opt/host/$<
-	docker run -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-customize /opt/host/$<
+	docker run --rm -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-extract -p /opt/host/profiles/train.lua /opt/host/$<
+	docker run --rm -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-partition /opt/host/$<
+	docker run --rm -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-customize /opt/host/$<
 
 output/filtered_bus.osrm: output/filtered_bus.osm.pbf profiles/bus.lua
-	docker run -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.25.0 osrm-extract -p /opt/host/profiles/bus.lua /opt/host/$<
-	docker run -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.25.0 osrm-partition /opt/host/$<
-	docker run -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.25.0 osrm-customize /opt/host/$<
+	docker run --rm -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.25.0 osrm-extract -p /opt/host/profiles/bus.lua /opt/host/$<
+	docker run --rm -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.25.0 osrm-partition /opt/host/$<
+	docker run --rm -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.25.0 osrm-customize /opt/host/$<
 
 bus: output/filtered_bus.osrm
 
