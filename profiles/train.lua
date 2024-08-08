@@ -7,7 +7,7 @@ function setup()
       weight_name                    = 'routability',
       left_hand_driving              = true,
       u_turn_penalty                 = 60 * 10, -- 10 time delay to change cabin
-	  u_turn_rate_penalry            = 200,
+      u_turn_rate_penalry            = 200,
       turn_duration                  = 20,
       continue_straight_at_waypoint  = false,
       max_angle                      = 30,
