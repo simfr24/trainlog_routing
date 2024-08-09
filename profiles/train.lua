@@ -89,7 +89,7 @@ end
 function process_turn(profile, turn)
     -- Refuse truns that have a big angle
     if math.abs(turn.angle) >  profile.properties.max_angle or turn.is_u_turn then
-	      turn.weight = u_turn_rate_penalty
+	      turn.weight = profile.properties.u_turn_rate_penalty
 		  turn.duration = turn.duration + profile.properties.u_turn_penalty
     end
 end
