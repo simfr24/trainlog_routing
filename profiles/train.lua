@@ -6,11 +6,11 @@ function setup()
       max_speed_for_map_matching     = 220/3.6, -- speed conversion to m/s
       weight_name                    = 'routability',
       left_hand_driving              = true,
-      u_turn_penalty                 = 60 * 10, -- 10 minutes to change cabin
+      u_turn_penalty                 = 60 * 10, -- 10 time delay to change cabin
+      u_turn_rate_penalty            = 200,
       turn_duration                  = 20,
       continue_straight_at_waypoint  = false,
       max_angle                      = 30,
-
       secondary_speed                = 30,
       speed                          = 130,
     },
@@ -88,13 +88,9 @@ end
 
 function process_turn(profile, turn)
     -- Refuse truns that have a big angle
-    if math.abs(turn.angle) >  profile.properties.max_angle then
-		  turn.weight = constants.max_turn_weight
-    end
-
-    -- If we go backwards, add the penalty to change cabs
-    if turn.is_u_turn then
-      turn.duration = turn.duration + profile.properties.u_turn_penalty
+    if math.abs(turn.angle) >  profile.properties.max_angle or turn.is_u_turn then
+	      turn.weight = u_turn_rate_penalty
+		  turn.duration = turn.duration + profile.properties.u_turn_penalty
     end
 end
 
