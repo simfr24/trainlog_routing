@@ -86,10 +86,6 @@ serve-train: train
 	-@docker stop train_routing > /dev/null 2>&1 && docker rm train_routing > /dev/null 2>&1
 	docker run --restart always --name train_routing -t -d -p 5000:5000 -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-routed --algorithm mld /opt/host/output/filtered_train.osrm
 	
-serve-aerialway: aerialway
-	-@docker stop train_routing > /dev/null 2>&1 && docker rm train_routing > /dev/null 2>&1
-	docker run --restart always --name train_routing -t -d -p 5000:5000 -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-routed --algorithm mld /opt/host/output/filtered_aerialway.osrm
-
 serve-ferry: ferry
 	-@docker stop ferry_routing > /dev/null 2>&1 && docker rm ferry_routing > /dev/null 2>&1
 	docker run --restart always --name ferry_routing -t -d -p 5001:5000 -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-routed --algorithm mld /opt/host/output/filtered_ferry.osrm
@@ -97,5 +93,9 @@ serve-ferry: ferry
 serve-bus: bus
 	-@docker stop bus_routing > /dev/null 2>&1 && docker rm bus_routing > /dev/null 2>&1
 	docker run --restart always --name bus_routing -t -d -p 5002:5000 -v $(shell pwd):/opt/host osrm/osrm-backend:v5.25.0 osrm-routed --algorithm mld /opt/host/output/filtered_bus.osrm
+
+serve-aerialway: aerialway
+	-@docker stop aerialway_routing > /dev/null 2>&1 && docker rm aerialway_routing > /dev/null 2>&1
+	docker run --restart always --name aerialway_routing -t -d -p 5003:5000 -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-routed --algorithm mld /opt/host/output/filtered_aerialway.osrm
 
 serve-all: serve-train serve-aerialway serve-ferry serve-bus
