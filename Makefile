@@ -27,6 +27,10 @@ filtered_ferry/%.osm.pbf: world/%.osm.pbf params/ferry_filter.params
 filtered_train/%.osm.pbf: world/%.osm.pbf params/train_filter.params
 	mkdir -p filtered_train
 	osmium tags-filter --expressions=params/train_filter.params $< -o $@ --overwrite
+	
+filtered_aerialway/%.osm.pbf: world/%.osm.pbf params/train_filter.params
+	mkdir -p filtered_aerialway
+	osmium tags-filter --expressions=params/aerialway_filter.params $< -o $@ --overwrite --progress -v
 
 # Filter a raw country for bus (in world/europe/*) to type-specific data (in filtered_bus/*)
 filtered_bus/%.osm.pbf: world/europe/%.osm.pbf params/bus_filter.params
@@ -38,6 +42,9 @@ output/filtered_ferry.osm.pbf: $(subst world,filtered_ferry,$(COUNTRIES_PBF))
 	osmium merge $^ -o $@ --overwrite
 
 output/filtered_train.osm.pbf: $(subst world,filtered_train,$(COUNTRIES_PBF))
+	osmium merge $^ -o $@ --overwrite
+	
+output/filtered_aerialway.osm.pbf: $(subst world,filtered_aerialway,$(COUNTRIES_PBF))
 	osmium merge $^ -o $@ --overwrite
 
 # Combine all type-specific bus data into one file, using BUS_COUNTRIES_PBF variable
@@ -54,6 +61,11 @@ output/filtered_train.osrm: output/filtered_train.osm.pbf profiles/train.lua
 	docker run --rm -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-extract -p /opt/host/profiles/train.lua /opt/host/$<
 	docker run --rm -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-partition /opt/host/$<
 	docker run --rm -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-customize /opt/host/$<
+	
+output/filtered_aerialway.osrm: output/filtered_aerialway.osm.pbf profiles/aerialway.lua
+	docker run --rm -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-extract -p /opt/host/profiles/aerialway.lua /opt/host/$<
+	docker run --rm -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-partition /opt/host/$<
+	docker run --rm -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-customize /opt/host/$<
 
 output/filtered_bus.osrm: output/filtered_bus.osm.pbf profiles/bus.lua
 	docker run --rm -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.25.0 osrm-extract -p /opt/host/profiles/bus.lua /opt/host/$<
@@ -64,13 +76,19 @@ bus: output/filtered_bus.osrm
 
 train: output/filtered_train.osrm
 
+aerialway: output/filtered_aerialway.osrm
+
 ferry: output/filtered_ferry.osrm
 
-all: train ferry bus
+all: train ferry bus aerialway
 
 serve-train: train
 	-@docker stop train_routing > /dev/null 2>&1 && docker rm train_routing > /dev/null 2>&1
 	docker run --restart always --name train_routing -t -d -p 5000:5000 -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-routed --algorithm mld /opt/host/output/filtered_train.osrm
+	
+serve-aerialway: aerialway
+	-@docker stop train_routing > /dev/null 2>&1 && docker rm train_routing > /dev/null 2>&1
+	docker run --restart always --name train_routing -t -d -p 5000:5000 -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-routed --algorithm mld /opt/host/output/filtered_aerialway.osrm
 
 serve-ferry: ferry
 	-@docker stop ferry_routing > /dev/null 2>&1 && docker rm ferry_routing > /dev/null 2>&1
@@ -80,4 +98,4 @@ serve-bus: bus
 	-@docker stop bus_routing > /dev/null 2>&1 && docker rm bus_routing > /dev/null 2>&1
 	docker run --restart always --name bus_routing -t -d -p 5002:5000 -v $(shell pwd):/opt/host osrm/osrm-backend:v5.25.0 osrm-routed --algorithm mld /opt/host/output/filtered_bus.osrm
 
-serve-all: serve-train serve-ferry serve-bus
+serve-all: serve-train serve-aerialway serve-ferry serve-bus
