@@ -92,7 +92,7 @@ serve-ferry: ferry
 
 serve-bus: bus
 	-@docker stop bus_routing > /dev/null 2>&1 && docker rm bus_routing > /dev/null 2>&1
-	docker run --restart always --memory=3g --memory-swap=53g --name bus_routing -t -d -p 5002:5000 -v $(shell pwd):/opt/host osrm/osrm-backend:v5.25.0 osrm-routed --algorithm mld /opt/host/output/filtered_bus.osrm
+	docker run --restart always --memory=10g --memory-swap=10g --name bus_routing -t -d -p 5569:5000 -v $(shell pwd):/opt/host osrm/osrm-backend:v5.25.0 osrm-routed --algorithm mld /opt/host/output/filtered_bus.osrm
 
 serve-aerialway: aerialway
 	-@docker stop aerialway_routing > /dev/null 2>&1 && docker rm aerialway_routing > /dev/null 2>&1
