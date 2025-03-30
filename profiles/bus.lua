@@ -61,7 +61,8 @@ function setup()
       'no',
       'entrance',
       'height_restrictor',
-      'arch'
+      'arch',
+      'bus'
     },
 
     access_tag_whitelist = Set {
@@ -72,7 +73,8 @@ function setup()
       'permissive',
       'designated',
       'hov',
-      'psv'
+      'psv',
+      'bus'
     },
 
     access_tag_blacklist = Set {
