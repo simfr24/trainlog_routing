@@ -31,7 +31,7 @@ function setup()
 
     default_mode              = mode.driving,
     default_speed             = 10,
-    oneway_handling           = true,
+    oneway_handling           = false,
     side_road_multiplier      = 0.8,
     turn_penalty              = 7.5,
     speed_reduction           = 0.8,
