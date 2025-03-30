@@ -31,7 +31,7 @@ function setup()
 
     default_mode              = mode.driving,
     default_speed             = 10,
-    oneway_handling           = false,
+    oneway_handling           = true,
     side_road_multiplier      = 0.8,
     turn_penalty              = 7.5,
     speed_reduction           = 0.8,
@@ -61,7 +61,8 @@ function setup()
       'no',
       'entrance',
       'height_restrictor',
-      'arch'
+      'arch',
+	  'bus'
     },
 
     access_tag_whitelist = Set {
@@ -72,7 +73,8 @@ function setup()
       'permissive',
       'designated',
       'hov',
-      'psv'
+      'psv',
+	  'bus'
     },
 
     access_tag_blacklist = Set {
