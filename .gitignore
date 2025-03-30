@@ -4,3 +4,4 @@ world/
 filtered_*
 output/
 
+*.bak
