@@ -61,7 +61,9 @@ function setup()
       'no',
       'entrance',
       'height_restrictor',
-      'arch'
+      'arch',
+      'bus',
+      'psv'
     },
 
     access_tag_whitelist = Set {
@@ -72,7 +74,8 @@ function setup()
       'permissive',
       'designated',
       'hov',
-      'psv'
+      'psv',
+      'bus'
     },
 
     access_tag_blacklist = Set {
@@ -464,6 +467,14 @@ function process_way(profile, way, result, relations)
 
   WayHandlers.run(profile, way, result, data, handlers, relations)
 
+  local oneway_bus = way:get_value_by_key("oneway:bus")
+  local oneway_psv = way:get_value_by_key("oneway:psv")
+
+  if oneway_bus == "no" or oneway_psv == "no" then
+  result.forward_mode = mode.driving
+  result.backward_mode = mode.driving
+  end
+  
   if profile.cardinal_directions then
       Relations.process_way_refs(way, relations, result)
   end
