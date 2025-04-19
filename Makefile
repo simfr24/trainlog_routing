@@ -1,7 +1,7 @@
 .PRECIOUS: %.pbf
 .SECONDARY: $(COUNTRIES_PBF)
 
-$(shell mkdir -p world output filtered_ferry filtered_train filtered_bus world/europe)
+$(shell mkdir -p world output filtered_ferry filtered_train filtered_bus world/africa world/asia world/australia-oceania world/central-america world/europe world/north-america world/south-america)
 
 # Common variables for train and ferry
 WANTED_COUNTRIES := $(shell grep -v "\#" countries.wanted)
@@ -9,15 +9,15 @@ COUNTRIES_PBF := $(addsuffix -latest.osm.pbf,$(addprefix world/,$(WANTED_COUNTRI
 
 # New variables for bus
 BUS_WANTED_COUNTRIES := $(shell grep -v "\#" bus_countries.wanted)
-BUS_COUNTRIES_PBF := $(addsuffix -latest.osm.pbf,$(addprefix world/europe/,$(BUS_WANTED_COUNTRIES)))
+BUS_COUNTRIES_PBF := $(addsuffix -latest.osm.pbf,$(addprefix world/,$(BUS_WANTED_COUNTRIES)))
 
 # Download the raw source file of a country
 world/%.osm.pbf:
 	wget -N -q --show-progress -P world/ https://download.geofabrik.de/$*.osm.pbf
 
 # Download the raw source file of a country for bus, specifying folder
-world/europe/%.osm.pbf:
-	wget -N -q --show-progress -P world/europe/ https://download.geofabrik.de/europe/$*.osm.pbf
+world/%.osm.pbf:
+	wget -N -q --show-progress -P $(@D)/ https://download.geofabrik.de/$*.osm.pbf
 
 # Filter a raw country (in world/*) to type-specific data (in filtered/*)
 filtered_ferry/%.osm.pbf: world/%.osm.pbf params/ferry_filter.params
@@ -32,8 +32,8 @@ filtered_aerialway/%.osm.pbf: world/%.osm.pbf params/train_filter.params
 	mkdir -p filtered_aerialway
 	osmium tags-filter --expressions=params/aerialway_filter.params $< -o $@ --overwrite --progress -v
 
-# Filter a raw country for bus (in world/europe/*) to type-specific data (in filtered_bus/*)
-filtered_bus/%.osm.pbf: world/europe/%.osm.pbf params/bus_filter.params
+# Filter a raw country for bus (in world/*) to type-specific data (in filtered_bus/*)
+filtered_bus/%.osm.pbf: world/%.osm.pbf params/bus_filter.params
 	mkdir -p filtered_bus
 	osmium tags-filter --expressions=params/bus_filter.params $< -o $@ --overwrite
 
@@ -48,7 +48,7 @@ output/filtered_aerialway.osm.pbf: $(subst world,filtered_aerialway,$(COUNTRIES_
 	osmium merge $^ -o $@ --overwrite
 
 # Combine all type-specific bus data into one file, using BUS_COUNTRIES_PBF variable
-output/filtered_bus.osm.pbf: $(subst world/europe,filtered_bus,$(BUS_COUNTRIES_PBF))
+output/filtered_bus.osm.pbf: $(patsubst world/%/,filtered_bus/,$(BUS_COUNTRIES_PBF))
 	osmium merge $^ -o $@ --overwrite
 
 # Compute the real OSRM data on the combined file
