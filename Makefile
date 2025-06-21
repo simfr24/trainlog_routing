@@ -3,12 +3,17 @@
 
 $(shell mkdir -p world output filtered_ferry filtered_train filtered_bus world/africa world/asia world/australia-oceania world/central-america world/europe world/north-america world/south-america)
 
+# Region override for bus router, defaults to all regions
+# Ex: to only generate files for europe, run: 
+# sudo make bus bregion=europe
+bregion = ""
+
 # Common variables for train and ferry
 WANTED_COUNTRIES := $(shell grep -v "\#" countries.wanted)
 COUNTRIES_PBF := $(addsuffix -latest.osm.pbf,$(addprefix world/,$(WANTED_COUNTRIES)))
 
 # New variables for bus
-BUS_WANTED_COUNTRIES := $(shell grep -v "\#" bus_countries.wanted)
+BUS_WANTED_COUNTRIES := $(shell grep -v "\#" bus_countries.wanted | grep -i $(bregion))
 BUS_COUNTRIES_PBF := $(addsuffix -latest.osm.pbf,$(addprefix world/,$(BUS_WANTED_COUNTRIES)))
 
 # Download the raw source file of a country
@@ -74,6 +79,10 @@ output/filtered_bus.osrm: output/filtered_bus.osm.pbf profiles/bus.lua
 
 bus: output/filtered_bus.osrm
 
+bus-%:
+	-@echo "using $*"
+	-@echo $(BUS_COUNTRIES_PBF)
+
 train: output/filtered_train.osrm
 
 aerialway: output/filtered_aerialway.osrm
@@ -103,7 +112,16 @@ serve-all: serve-train serve-aerialway serve-ferry serve-bus
 clean-bus: 
 	-@rm output/filtered_bus*
 
+clean-train:
+	-@rm output/filtered_train*
+
+clean-aerialway:
+	-@rm output/filtered_aerialway*
+
+clean-ferry:
+	-@rm output/filtered_ferry*
+
 clean-downloads:
 	-@rm -r world/*/*
 
-clean: clean-bus clean-downloads
+clean: clean-bus clean-train clean-aerialway clean-ferry clean-downloads
