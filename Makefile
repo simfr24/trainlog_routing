@@ -68,9 +68,9 @@ output/filtered_aerialway.osrm: output/filtered_aerialway.osm.pbf profiles/aeria
 	docker run --rm -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-customize /opt/host/$<
 
 output/filtered_bus.osrm: output/filtered_bus.osm.pbf profiles/bus.lua
-	docker run --rm -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.25.0 osrm-extract -p /opt/host/profiles/bus.lua /opt/host/$<
-	docker run --rm -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.25.0 osrm-partition /opt/host/$<
-	docker run --rm -t -v $(shell pwd):/opt/host osrm/osrm-backend:v5.25.0 osrm-customize /opt/host/$<
+	docker run --rm -t -v $(shell pwd):/opt/host ghcr.io/project-osrm/osrm-backend:v6.0.0 osrm-extract -p /opt/host/profiles/bus.lua /opt/host/$<
+	docker run --rm -t -v $(shell pwd):/opt/host ghcr.io/project-osrm/osrm-backend:v6.0.0 osrm-partition /opt/host/$<
+	docker run --rm -t -v $(shell pwd):/opt/host ghcr.io/project-osrm/osrm-backend:v6.0.0 osrm-customize /opt/host/$<
 
 bus: output/filtered_bus.osrm
 
@@ -92,10 +92,18 @@ serve-ferry: ferry
 
 serve-bus: bus
 	-@docker stop bus_routing > /dev/null 2>&1 && docker rm bus_routing > /dev/null 2>&1
-	docker run --restart always --memory=3g --memory-swap=53g --name bus_routing -t -d -p 5002:5000 -v $(shell pwd):/opt/host osrm/osrm-backend:v5.25.0 osrm-routed --algorithm mld /opt/host/output/filtered_bus.osrm
+	docker run --restart always --memory=3g --memory-swap=53g --name bus_routing -t -d -p 5002:5000 -v $(shell pwd):/opt/host ghcr.io/project-osrm/osrm-backend:v6.0.0 osrm-routed --algorithm mld /opt/host/output/filtered_bus.osrm
 
 serve-aerialway: aerialway
 	-@docker stop aerialway_routing > /dev/null 2>&1 && docker rm aerialway_routing > /dev/null 2>&1
 	docker run --restart always --name aerialway_routing -t -d -p 5003:5000 -v $(shell pwd):/opt/host osrm/osrm-backend:v5.22.0 osrm-routed --algorithm mld /opt/host/output/filtered_aerialway.osrm
 
 serve-all: serve-train serve-aerialway serve-ferry serve-bus
+
+clean-bus: 
+	-@rm output/filtered_bus*
+
+clean-downloads:
+	-@rm -r world/*/*
+
+clean: clean-bus clean-downloads

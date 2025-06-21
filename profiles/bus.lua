@@ -118,7 +118,9 @@ function setup()
     restrictions = Sequence {
       'motorcar',
       'motor_vehicle',
-      'vehicle'
+      'vehicle',
+      'bus',
+      'psv',
     },
 
     classes = Sequence {
@@ -193,6 +195,7 @@ function setup()
       'no',
       'widening',
       'minor',
+      'busway',
     },
 
     route_speeds = {
